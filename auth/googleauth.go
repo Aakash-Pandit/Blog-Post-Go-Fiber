@@ -64,31 +64,6 @@ func GoogleTokenValidation(token, token_url string) (bool, map[string]interface{
 
 func GoogleAuth(context *fiber.Ctx) error {
 
-	// payload := struct {
-	// 	Token string `json:"token"`
-	// }{}
-
-	// if err := context.BodyParser(&payload); err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// if payload.Token == "" {
-	// 	return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"detail": "token is empty",
-	// 	})
-	// }
-
-	// valid, data := GoogleTokenValidation(payload.Token, GOOGLE_TOKEN_VALIDATION_URL)
-	// if !valid {
-	// 	return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"detail": "Invalid Token",
-	// 	})
-	// }
-
-	// fmt.Println(valid)
-	// fmt.Println(data)
-
-	// request header
 	token := string(context.Request().Header.Peek("Authorization"))
 
 	if token == "" {
