@@ -1,6 +1,7 @@
-package blogs
+package validators
 
 import (
+	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/models"
 	"github.com/go-playground/validator"
 )
 
@@ -10,7 +11,7 @@ type ErrorResponse struct {
 	Value       string
 }
 
-func ValidateBlogStruct(blog Blog) []*ErrorResponse {
+func ValidateBlogStruct(blog models.Blog) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validation := validator.New()
 	err := validation.Struct(blog)
