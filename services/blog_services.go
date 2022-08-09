@@ -1,9 +1,6 @@
 package services
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/models"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/storage"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/validators"
@@ -21,7 +18,7 @@ func GetBlogs(context *fiber.Ctx) error {
 		})
 	}
 
-	return context.Status(http.StatusOK).JSON(&fiber.Map{
+	return context.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"count":   len(*blogs),
 		"results": blogs,
 	})
@@ -39,7 +36,7 @@ func GetBlogByID(context *fiber.Ctx) error {
 		})
 	}
 
-	return context.Status(http.StatusOK).JSON(blog)
+	return context.Status(fiber.StatusOK).JSON(blog)
 }
 
 func CreateBlog(context *fiber.Ctx) error {
@@ -58,19 +55,57 @@ func CreateBlog(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	blog.Created = time.Now()
-	blog.Modified = time.Now()
-
 	repo := storage.GetDatabase()
 	err = repo.Create(&blog).Error
 
 	if err != nil {
-		context.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"message": "could not create blog"})
-		return err
+		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"detail": err.Error(),
+		})
 	}
 
-	return context.Status(http.StatusOK).JSON(blog)
+	return context.Status(fiber.StatusCreated).JSON(blog)
+}
+
+func UpdateBlog(context *fiber.Ctx) error {
+	id := context.Params("id")
+	if id == "" {
+		context.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "id cannot be empty",
+		})
+		return nil
+	}
+
+	blog := &models.Blog{}
+
+	err := context.BodyParser(&blog)
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	errors := validators.ValidateBlogStruct(*blog)
+	if errors != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	repo := storage.GetDatabase()
+	err = repo.Where("id = ?", id).Updates(blog).Error
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	err = repo.Where("id = ?", id).First(blog).Error
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	return context.Status(fiber.StatusOK).JSON(blog)
 }
 
 func DeleteBlog(context *fiber.Ctx) error {
@@ -87,5 +122,5 @@ func DeleteBlog(context *fiber.Ctx) error {
 
 	repo.Where("id = ?", id).Delete(blog)
 
-	return context.Status(http.StatusNoContent).JSON(&fiber.Map{})
+	return context.Status(fiber.StatusNoContent).JSON(&fiber.Map{})
 }
