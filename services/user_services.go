@@ -8,6 +8,38 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func GetUsers(context *fiber.Ctx) error {
+	users := &[]models.User{}
+
+	db := storage.GetDatabase()
+	err := db.Find(users).Error
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	return context.Status(fiber.StatusOK).JSON(&fiber.Map{
+		"count":   len(*users),
+		"results": users,
+	})
+}
+
+func GetUserByID(context *fiber.Ctx) error {
+	id := context.Params("id")
+	user := &models.User{}
+
+	db := storage.GetDatabase()
+	err := db.Where("id = ?", id).First(user).Error
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	return context.Status(fiber.StatusOK).JSON(user)
+}
+
 func CreateUser(context *fiber.Ctx) error {
 	authtoken := models.AuthToken{}
 
