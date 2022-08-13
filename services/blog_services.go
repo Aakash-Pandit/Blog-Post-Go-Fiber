@@ -10,8 +10,8 @@ import (
 func GetBlogs(context *fiber.Ctx) error {
 	blogs := &[]models.Blog{}
 
-	repo := storage.GetDatabase()
-	err := repo.Find(blogs).Error
+	db := storage.GetDatabase()
+	err := db.Find(blogs).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -28,8 +28,8 @@ func GetBlogByID(context *fiber.Ctx) error {
 	id := context.Params("id")
 	blog := &models.Blog{}
 
-	repo := storage.GetDatabase()
-	err := repo.Where("id = ?", id).First(blog).Error
+	db := storage.GetDatabase()
+	err := db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -55,8 +55,8 @@ func CreateBlog(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	repo := storage.GetDatabase()
-	err = repo.Create(&blog).Error
+	db := storage.GetDatabase()
+	err = db.Create(&blog).Error
 
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -90,15 +90,15 @@ func UpdateBlog(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	repo := storage.GetDatabase()
-	err = repo.Where("id = ?", id).Updates(blog).Error
+	db := storage.GetDatabase()
+	err = db.Where("id = ?", id).Updates(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"detail": err.Error(),
 		})
 	}
 
-	err = repo.Where("id = ?", id).First(blog).Error
+	err = db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -112,15 +112,15 @@ func DeleteBlog(context *fiber.Ctx) error {
 	blog := &models.Blog{}
 	id := context.Params("id")
 
-	repo := storage.GetDatabase()
-	err := repo.Where("id = ?", id).First(blog).Error
+	db := storage.GetDatabase()
+	err := db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
 		})
 	}
 
-	repo.Where("id = ?", id).Delete(blog)
+	db.Where("id = ?", id).Delete(blog)
 
 	return context.Status(fiber.StatusNoContent).JSON(&fiber.Map{})
 }

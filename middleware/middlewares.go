@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/auth"
@@ -12,6 +11,12 @@ func GoogleAuthmiddleware() fiber.Handler {
 
 	return func(context *fiber.Ctx) error {
 		token := string(context.Request().Header.Peek("Authorization"))
+		if token == "" {
+			return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"detail": "token is empty",
+			})
+		}
+
 		token_info := strings.Split(token, " ")
 		if len(token_info) != 2 {
 			return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -25,14 +30,7 @@ func GoogleAuthmiddleware() fiber.Handler {
 			})
 		}
 
-		if token == "" {
-			return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"detail": "token is empty",
-			})
-		}
-
 		valid, data := auth.GoogleTokenValidation(token_info[1], auth.GOOGLE_TOKEN_VALIDATION_URL)
-		fmt.Println(data)
 		if !valid {
 			return context.Status(fiber.StatusUnauthorized).JSON(data)
 		}
