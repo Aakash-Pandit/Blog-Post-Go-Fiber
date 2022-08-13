@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/config"
+	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/middleware"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/models"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/routes"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/storage"
@@ -25,7 +26,7 @@ func main() {
 	}
 
 	app := fiber.New()
-	app.Use(logger.New())
+	app.Use(logger.New(), middleware.GoogleAuthmiddleware())
 	routes.SetupRoutes(app)
 
 	app.Listen(":" + config.BackendPort)

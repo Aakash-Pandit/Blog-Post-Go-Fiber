@@ -1,4 +1,4 @@
-package auth
+package middleware
 
 import (
 	"encoding/json"
@@ -62,25 +62,25 @@ func GoogleTokenValidation(token, token_url string) (bool, map[string]interface{
 	return valid, payload
 }
 
-func GoogleAuth(context *fiber.Ctx) error {
+func GoogleAuthmiddleware() fiber.Handler {
 
-	token := string(context.Request().Header.Peek("Authorization"))
+	return func(context *fiber.Ctx) error {
+		token := string(context.Request().Header.Peek("Authorization"))
 
-	if token == "" {
-		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"detail": "token is empty",
-		})
-	}
+		if token == "" {
+			return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"detail": "token is empty",
+			})
+		}
 
-	valid, data := GoogleTokenValidation(token, GOOGLE_TOKEN_VALIDATION_URL)
-	if !valid {
-		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		valid, data := GoogleTokenValidation(token, GOOGLE_TOKEN_VALIDATION_URL)
+		fmt.Println(data)
+		if valid {
+			return context.Next()
+		}
+
+		return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"detail": "Invalid Token",
 		})
 	}
-
-	fmt.Println(valid)
-	fmt.Println(data)
-
-	return nil
 }
