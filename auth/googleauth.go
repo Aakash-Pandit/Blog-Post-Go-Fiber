@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 )
 
 var GOOGLE_ACCOUNT_DOMAIN = []string{"accounts.google.com", "https://accounts.google.com"}
@@ -35,20 +34,8 @@ func VerifyIss(google_account_domain []string, iss string) bool {
 }
 
 func GoogleTokenValidation(token, token_url string) (bool, map[string]interface{}) {
-	token_info := strings.Split(token, " ")
-	if len(token_info) != 2 {
-		err := make(map[string]interface{})
-		err["detail"] = "length of the token should be 2"
-		return false, err
-	}
 
-	if token_info[0] != "Bearer" {
-		err := make(map[string]interface{})
-		err["detail"] = "Token should be Bearer"
-		return false, err
-	}
-
-	url := fmt.Sprint(token_url + token_info[1])
+	url := fmt.Sprint(token_url + token)
 
 	response, err := http.Get(url)
 	if err != nil {
