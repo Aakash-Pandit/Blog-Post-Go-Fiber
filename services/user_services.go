@@ -77,7 +77,6 @@ func CreateUser(context *fiber.Ctx) error {
 				"detail": err.Error(),
 			})
 		}
-
 	}
 
 	return context.Status(fiber.StatusCreated).JSON(user)
