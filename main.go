@@ -25,6 +25,7 @@ func main() {
 	}
 
 	app := fiber.New()
+	app.Use("", logger.New())
 	app.Use("/api/v1", logger.New(), middleware.GoogleAuthmiddleware())
 	routes.SetupRoutes(app)
 
