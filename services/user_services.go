@@ -65,19 +65,21 @@ func CreateUser(context *fiber.Ctx) error {
 	user := &models.User{}
 	fetching_error := db.Where("email = ?", data["email"].(string)).First(user).Error
 	if fetching_error != nil {
-		user := models.User{
+		new_user := models.User{
 			FirstName: data["given_name"].(string),
 			LastName:  data["family_name"].(string),
 			Email:     data["email"].(string),
 		}
 
-		err = db.Create(&user).Error
+		err = db.Create(&new_user).Error
 		if err != nil {
 			return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 				"detail": err.Error(),
 			})
 		}
+
+		return context.Status(fiber.StatusCreated).JSON(new_user)
 	}
 
-	return context.Status(fiber.StatusCreated).JSON(user)
+	return context.Status(fiber.StatusOK).JSON(user)
 }
