@@ -61,19 +61,23 @@ func CreateUser(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusUnauthorized).JSON(data)
 	}
 
-	user := models.User{
-		FirstName: data["given_name"].(string),
-		LastName:  data["family_name"].(string),
-		Email:     data["email"].(string),
-	}
-
 	db := storage.GetDatabase()
-	err = db.Create(&user).Error
+	user := &models.User{}
+	fetching_error := db.Where("email = ?", data["email"].(string)).First(user).Error
+	if fetching_error != nil {
+		user := models.User{
+			FirstName: data["given_name"].(string),
+			LastName:  data["family_name"].(string),
+			Email:     data["email"].(string),
+		}
 
-	if err != nil {
-		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-			"detail": err.Error(),
-		})
+		err = db.Create(&user).Error
+		if err != nil {
+			return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+				"detail": err.Error(),
+			})
+		}
+
 	}
 
 	return context.Status(fiber.StatusCreated).JSON(user)
