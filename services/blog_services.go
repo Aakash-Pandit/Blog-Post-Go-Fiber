@@ -49,6 +49,13 @@ func CreateBlog(context *fiber.Ctx) error {
 		})
 	}
 
+	user, err := FetchUserFromRequest(context)
+	if err != nil {
+		return context.Status(fiber.StatusUnauthorized).JSON(err)
+	}
+
+	blog.CreatedById = user.ID
+
 	errors := validators.ValidateBlogStruct(blog)
 
 	if errors != nil {

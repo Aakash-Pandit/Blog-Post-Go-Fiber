@@ -8,11 +8,12 @@ import (
 )
 
 type Blog struct {
-	ID       uuid.UUID `json:"id" gorm:"primary key"`
-	Title    string    `json:"title" validate:"required"`
-	Content  string    `json:"content" validate:"required"`
-	Created  time.Time `json:"created"`
-	Modified time.Time `json:"modified"`
+	ID          uuid.UUID `json:"id" gorm:"primaryKey"`
+	Title       string    `json:"title" validate:"required"`
+	Content     string    `json:"content" validate:"required"`
+	CreatedById uuid.UUID `json:"created_by_id" gorm:"type:uuid;column:user_foreign_key;not null;"`
+	Created     time.Time `json:"created"`
+	Modified    time.Time `json:"modified"`
 }
 
 func (blog *Blog) BeforeCreate(tx *gorm.DB) (err error) {
