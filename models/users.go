@@ -12,7 +12,7 @@ type AuthToken struct {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id" gorm:"primary key"`
+	ID        uuid.UUID `json:"id" gorm:"primaryKey"`
 	FirstName string    `json:"first_name" validate:"required"`
 	LastName  string    `json:"last_name" validate:"required"`
 	Email     string    `json:"email" validate:"required"`
