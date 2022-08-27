@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 var GOOGLE_ACCOUNT_DOMAIN = []string{"accounts.google.com", "https://accounts.google.com"}
@@ -36,6 +34,7 @@ func VerifyIss(google_account_domain []string, iss string) bool {
 }
 
 func GoogleTokenValidation(token, token_url string) (bool, map[string]interface{}) {
+
 	url := fmt.Sprint(token_url + token)
 
 	response, err := http.Get(url)
@@ -53,34 +52,11 @@ func GoogleTokenValidation(token, token_url string) (bool, map[string]interface{
 
 	if iss == nil {
 		err := make(map[string]interface{})
-		err["error"] = "Invalid Token"
+		err["detail"] = "Invalid Token"
 		return false, err
 	}
 
 	valid := VerifyIss(GOOGLE_ACCOUNT_DOMAIN, iss.(string))
 
 	return valid, payload
-}
-
-func GoogleAuth(context *fiber.Ctx) error {
-
-	token := string(context.Request().Header.Peek("Authorization"))
-
-	if token == "" {
-		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"detail": "token is empty",
-		})
-	}
-
-	valid, data := GoogleTokenValidation(token, GOOGLE_TOKEN_VALIDATION_URL)
-	if !valid {
-		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"detail": "Invalid Token",
-		})
-	}
-
-	fmt.Println(valid)
-	fmt.Println(data)
-
-	return nil
 }

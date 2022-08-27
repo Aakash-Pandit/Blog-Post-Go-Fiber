@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/config"
-	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/models"
+	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/middleware"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/routes"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/storage"
 	"github.com/gofiber/fiber/v2"
@@ -19,13 +19,14 @@ func main() {
 		log.Fatal("could not load database")
 	}
 
-	err = models.MigrateBlogs(db)
+	err = storage.MigrateDatabase(db)
 	if err != nil {
-		log.Fatal("could not migrate db")
+		return
 	}
 
 	app := fiber.New()
-	app.Use(logger.New())
+	app.Use("", logger.New())
+	app.Use("/api/v1", logger.New(), middleware.GoogleAuthmiddleware())
 	routes.SetupRoutes(app)
 
 	app.Listen(":" + config.BackendPort)

@@ -10,8 +10,8 @@ import (
 func GetBlogs(context *fiber.Ctx) error {
 	blogs := &[]models.Blog{}
 
-	repo := storage.GetDatabase()
-	err := repo.Find(blogs).Error
+	db := storage.GetDatabase()
+	err := db.Find(blogs).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -28,8 +28,8 @@ func GetBlogByID(context *fiber.Ctx) error {
 	id := context.Params("id")
 	blog := &models.Blog{}
 
-	repo := storage.GetDatabase()
-	err := repo.Where("id = ?", id).First(blog).Error
+	db := storage.GetDatabase()
+	err := db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -49,14 +49,21 @@ func CreateBlog(context *fiber.Ctx) error {
 		})
 	}
 
+	user, err := FetchUserFromRequest(context)
+	if err != nil {
+		return context.Status(fiber.StatusUnauthorized).JSON(err)
+	}
+
+	blog.CreatedById = user.ID
+
 	errors := validators.ValidateBlogStruct(blog)
 
 	if errors != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	repo := storage.GetDatabase()
-	err = repo.Create(&blog).Error
+	db := storage.GetDatabase()
+	err = db.Create(&blog).Error
 
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -90,15 +97,26 @@ func UpdateBlog(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	repo := storage.GetDatabase()
-	err = repo.Where("id = ?", id).Updates(blog).Error
+	user, err := FetchUserFromRequest(context)
+	if err != nil {
+		return context.Status(fiber.StatusUnauthorized).JSON(err)
+	}
+
+	if blog.CreatedById != user.ID {
+		return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"detail": "you are not authorized",
+		})
+	}
+
+	db := storage.GetDatabase()
+	err = db.Where("id = ?", id).Updates(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"detail": err.Error(),
 		})
 	}
 
-	err = repo.Where("id = ?", id).First(blog).Error
+	err = db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
@@ -112,15 +130,26 @@ func DeleteBlog(context *fiber.Ctx) error {
 	blog := &models.Blog{}
 	id := context.Params("id")
 
-	repo := storage.GetDatabase()
-	err := repo.Where("id = ?", id).First(blog).Error
+	db := storage.GetDatabase()
+	err := db.Where("id = ?", id).First(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"detail": err.Error(),
 		})
 	}
 
-	repo.Where("id = ?", id).Delete(blog)
+	user, err := FetchUserFromRequest(context)
+	if err != nil {
+		return context.Status(fiber.StatusUnauthorized).JSON(err)
+	}
+
+	if blog.CreatedById != user.ID {
+		return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"detail": "you are not authorized",
+		})
+	}
+
+	db.Where("id = ?", id).Delete(blog)
 
 	return context.Status(fiber.StatusNoContent).JSON(&fiber.Map{})
 }
