@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/auth"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/models"
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/storage"
@@ -114,7 +112,6 @@ func UpdateUser(context *fiber.Ctx) error {
 	user := &models.User{}
 	err = db.Where("username = ?", username.Username).First(user).Error
 	if err == nil {
-		fmt.Println("err: ", err)
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"detail": "Username already exists.",
 		})
