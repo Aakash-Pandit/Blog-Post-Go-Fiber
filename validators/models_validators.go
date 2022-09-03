@@ -58,3 +58,19 @@ func ValidateAuthTokenStruct(token models.AuthToken) []*ErrorResponse {
 	}
 	return errors
 }
+
+func ValidateUsernameStruct(username models.Username) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validation := validator.New()
+	err := validation.Struct(username)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}

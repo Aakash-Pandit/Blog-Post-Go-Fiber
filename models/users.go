@@ -21,6 +21,10 @@ type User struct {
 	Modified  time.Time `json:"modified"`
 }
 
+type Username struct {
+	Username string `json:"username" validate:"required"`
+}
+
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
 	user.ID = uuid.New()
 	user.Created = time.Now()
