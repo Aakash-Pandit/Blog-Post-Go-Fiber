@@ -103,7 +103,6 @@ func UpdateUser(context *fiber.Ctx) error {
 	}
 
 	errors := validators.ValidateUsernameStruct(username)
-
 	if errors != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(errors)
 	}
