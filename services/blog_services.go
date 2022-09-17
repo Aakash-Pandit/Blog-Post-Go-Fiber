@@ -102,13 +102,21 @@ func UpdateBlog(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusUnauthorized).JSON(err)
 	}
 
-	if blog.CreatedById != user.ID {
+	created_blog := &models.Blog{}
+	db := storage.GetDatabase()
+	err = db.Where("id = ?", id).First(created_blog).Error
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"detail": err.Error(),
+		})
+	}
+
+	if created_blog.CreatedById != user.ID {
 		return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"detail": "you are not authorized",
 		})
 	}
 
-	db := storage.GetDatabase()
 	err = db.Where("id = ?", id).Updates(blog).Error
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
