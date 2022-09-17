@@ -2,11 +2,9 @@ package config
 
 import (
 	"errors"
-	"log"
 	"os"
 
 	"github.com/Aakash-Pandit/Blog-Post-Go-Fiber/core"
-	"github.com/joho/godotenv"
 )
 
 func GetEnv(key string) (string, error) {
@@ -19,11 +17,6 @@ func GetEnv(key string) (string, error) {
 }
 
 func SetupEnv() *core.AppConfig {
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	var (
 		host, _        = GetEnv("DB_HOST")

@@ -13,8 +13,8 @@ import (
 
 func main() {
 
-	config := config.SetupEnv()
-	db, err := storage.NewConnection(config)
+	configuration := config.SetupEnv()
+	db, err := storage.NewConnection(configuration)
 	if err != nil {
 		log.Fatal("could not load database")
 	}
@@ -29,5 +29,5 @@ func main() {
 	app.Use("/api/v1", logger.New(), middleware.GoogleAuthmiddleware())
 	routes.SetupRoutes(app)
 
-	app.Listen(":" + config.BackendPort)
+	app.Listen(":" + configuration.BackendPort)
 }
