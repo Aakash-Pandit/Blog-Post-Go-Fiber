@@ -5,7 +5,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func ApiHome(c *fiber.Ctx) error {
+	return c.SendString("This is API Home")
+}
+
 func SetupRoutes(app *fiber.App) {
+	app.Get("/", ApiHome)
 	app.Post("/login", services.CreateUser)
 
 	api := app.Group("/api/v1")
