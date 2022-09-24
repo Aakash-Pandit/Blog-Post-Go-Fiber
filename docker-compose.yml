@@ -1,0 +1,44 @@
+version: '3'
+
+volumes:
+  local_postgres_data: 
+  local_postgres_data_backups: {}
+
+
+services:
+  backend: &backend
+    build:
+      context: .
+      dockerfile: ./compose/backend/Dockerfile
+    image: blog_post
+    restart: always
+    container_name: blog_post_backend
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    env_file:
+      - ./.envs/.env
+    ports:
+      - "8080:8080"
+    networks:
+      - blog_post
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/postgres/Dockerfile
+    image: postgres
+    container_name: blog_post_postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.env
+    networks:
+     - blog_post
+
+networks:
+  blog_post:
